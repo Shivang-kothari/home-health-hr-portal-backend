@@ -1,11 +1,19 @@
 import express from "express";
 import bcrypt from "bcryptjs";
+import mongoose from "mongoose";
+import { GridFSBucket } from "mongodb";
 import User from "../models/User.js";
+import Document from "../models/Document.js";
 import { withCredentialDefaults } from "../utils/credentials.js";
 
 const router = express.Router();
 
 const sanitize = (user) => user.toPublicJSON();
+
+const getDocumentsBucket = () => {
+  if (mongoose.connection.readyState !== 1 || !mongoose.connection.db) return null;
+  return new GridFSBucket(mongoose.connection.db, { bucketName: "documents" });
+};
 
 router.get("/", async (req, res) => {
   try {
@@ -404,6 +412,67 @@ router.patch("/:id/credentials", async (req, res) => {
     console.error("Request body:", JSON.stringify(req.body, null, 2).substring(0, 500)); // Log first 500 chars
     const message = error.message || "Server error";
     res.status(500).json({ message, error: error.name, details: process.env.NODE_ENV === 'development' ? error.stack : undefined });
+  }
+});
+
+// DELETE /api/users/:id - Delete a user and associated documents/files
+router.delete("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid user id" });
+    }
+
+    const user = await User.findById(id).select("_id email");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Find document metadata first so we can attempt GridFS cleanup.
+    const documents = await Document.find({ userId: id })
+      .select("_id fileId")
+      .lean();
+
+    const bucket = getDocumentsBucket();
+    let deletedFiles = 0;
+    let fileDeleteFailures = 0;
+    let skippedFileDeletes = 0;
+
+    if (!bucket && documents.length > 0) {
+      skippedFileDeletes = documents.length;
+      console.warn(
+        "⚠️ GridFS not available; deleting metadata/user only. Orphaned files may remain."
+      );
+    } else if (bucket && documents.length > 0) {
+      // Best-effort delete: continue even if individual deletions fail.
+      await Promise.all(
+        documents.map(async (doc) => {
+          try {
+            await bucket.delete(doc.fileId);
+            deletedFiles += 1;
+          } catch (err) {
+            fileDeleteFailures += 1;
+            console.error("Error deleting GridFS file:", err?.message || err);
+          }
+        })
+      );
+    }
+
+    const deleteDocsResult = await Document.deleteMany({ userId: id });
+    await User.findByIdAndDelete(id);
+
+    res.json({
+      success: true,
+      deletedUserId: id,
+      deletedDocuments: deleteDocsResult.deletedCount || 0,
+      deletedFiles,
+      fileDeleteFailures,
+      skippedFileDeletes,
+    });
+  } catch (error) {
+    console.error("Delete user error:", error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
