@@ -33,6 +33,16 @@ app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
 });
 
+// Some clients probe the API base URL to test connectivity.
+// Provide a lightweight JSON response for /api and /api/health.
+app.get("/api", (_req, res) => {
+  res.json({ status: "ok" });
+});
+
+app.get("/api/health", (_req, res) => {
+  res.json({ status: "ok" });
+});
+
 // Debug endpoint to check MongoDB data
 app.get("/api/debug/users", async (_req, res) => {
   try {
