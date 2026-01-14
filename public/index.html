@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HR Portal - Demo Frontend</title>
+    <style>
+      :root {
+        --bg: #0b1220;
+        --card: #121b2f;
+        --text: #e7eefc;
+        --muted: #a9b7d6;
+        --border: rgba(255, 255, 255, 0.12);
+        --accent: #6aa6ff;
+        --danger: #ff6a7a;
+      }
+
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji",
+          "Segoe UI Emoji";
+        background: radial-gradient(1200px 600px at 20% 0%, #1c2a4d 0%, var(--bg) 55%),
+          radial-gradient(1000px 500px at 80% 20%, #2a1f4e 0%, var(--bg) 60%);
+        color: var(--text);
+      }
+
+      a {
+        color: var(--accent);
+      }
+
+      .container {
+        max-width: 1040px;
+        margin: 32px auto;
+        padding: 0 16px;
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 16px;
+        margin-bottom: 18px;
+      }
+
+      .header h1 {
+        margin: 0;
+        font-size: 22px;
+        letter-spacing: 0.2px;
+      }
+
+      .header .sub {
+        color: var(--muted);
+        font-size: 13px;
+        margin-top: 6px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      @media (min-width: 920px) {
+        .grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      .card {
+        background: rgba(18, 27, 47, 0.82);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 14px;
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+        backdrop-filter: blur(10px);
+      }
+
+      .card h2 {
+        margin: 0 0 10px 0;
+        font-size: 15px;
+        letter-spacing: 0.2px;
+      }
+
+      label {
+        display: block;
+        font-size: 12px;
+        color: var(--muted);
+        margin: 10px 0 6px;
+      }
+
+      input,
+      textarea {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px 10px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: rgba(10, 16, 30, 0.85);
+        color: var(--text);
+        outline: none;
+      }
+
+      textarea {
+        min-height: 120px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New",
+          monospace;
+        font-size: 12px;
+      }
+
+      .row {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      @media (min-width: 560px) {
+        .row {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      button {
+        margin-top: 10px;
+        border: 1px solid var(--border);
+        background: rgba(106, 166, 255, 0.15);
+        color: var(--text);
+        padding: 10px 12px;
+        border-radius: 10px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: rgba(106, 166, 255, 0.25);
+      }
+
+      .inline {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .status {
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 6px 10px;
+        font-size: 12px;
+        color: var(--muted);
+        background: rgba(10, 16, 30, 0.55);
+      }
+
+      .ok {
+        color: #7dffb3;
+      }
+
+      .bad {
+        color: var(--danger);
+      }
+
+      .mono {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New",
+          monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div>
+          <h1>HR Portal Backend — Demo Frontend</h1>
+          <div class="sub">
+            This is a tiny static frontend served by the Express backend. APIs used: <span class="mono">/health</span>,
+            <span class="mono">/api/auth/*</span>, <span class="mono">/api/users</span>.
+          </div>
+        </div>
+        <div class="pill">
+          Backend:
+          <span id="health" class="mono">checking…</span>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h2>Register</h2>
+          <div class="row">
+            <div>
+              <label>First name</label>
+              <input id="regFirstName" placeholder="John" />
+            </div>
+            <div>
+              <label>Last name</label>
+              <input id="regLastName" placeholder="Doe" />
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label>Username *</label>
+              <input id="regUserName" placeholder="jdoe" />
+            </div>
+            <div>
+              <label>Email *</label>
+              <input id="regEmail" placeholder="john@example.com" />
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label>Password *</label>
+              <input id="regPassword" type="password" placeholder="••••••••" />
+            </div>
+            <div>
+              <label>Hire date (YYYY-MM-DD)</label>
+              <input id="regHireDate" placeholder="2026-01-14" />
+            </div>
+          </div>
+          <button id="btnRegister">Register</button>
+          <div class="status" id="regStatus"></div>
+        </div>
+
+        <div class="card">
+          <h2>Login</h2>
+          <div class="row">
+            <div>
+              <label>Email *</label>
+              <input id="loginEmail" placeholder="john@example.com" />
+            </div>
+            <div>
+              <label>Password *</label>
+              <input id="loginPassword" type="password" placeholder="••••••••" />
+            </div>
+          </div>
+          <button id="btnLogin">Login</button>
+          <div class="status" id="loginStatus"></div>
+        </div>
+
+        <div class="card" style="grid-column: 1 / -1">
+          <div class="inline" style="justify-content: space-between">
+            <h2 style="margin: 0">Users</h2>
+            <div class="inline">
+              <label style="margin: 0; display: inline-flex; align-items: center; gap: 8px">
+                <input id="excludeFiles" type="checkbox" checked style="width: auto; margin: 0" />
+                Exclude credential file data
+              </label>
+              <button id="btnLoadUsers" style="margin-top: 0">Load users</button>
+            </div>
+          </div>
+          <textarea id="usersOut" readonly class="mono" placeholder="Click “Load users”"></textarea>
+          <div class="status">
+            Tip: if you don’t have MongoDB running yet, use the repo’s <span class="mono">docker-compose.yml</span>.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
