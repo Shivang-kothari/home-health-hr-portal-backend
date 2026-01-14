@@ -19,15 +19,23 @@ if (!mongoUri) {
   process.exit(1);
 }
 
+const allowedOrigins = process.env.CLIENT_ORIGIN
+  ? process.env.CLIENT_ORIGIN.split(",").map((s) => s.trim()).filter(Boolean)
+  : null;
+
 app.use(
   cors({
-    origin: process.env.CLIENT_ORIGIN?.split(",") || "*",
+    // If CLIENT_ORIGIN is not set, reflect the request origin (works with credentials)
+    origin: allowedOrigins && allowedOrigins.length > 0 ? allowedOrigins : true,
     credentials: true,
   })
 );
 // Increase body size limit to 50MB to handle file uploads with base64 data
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// Minimal frontend (static) served by the backend
+app.use(express.static("public"));
 
 app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
